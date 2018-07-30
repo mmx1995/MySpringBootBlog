@@ -33,7 +33,7 @@ public class UserController {
         model.addAttribute("userList",userRepository.listUsers());
         model.addAttribute("title","用户管理");
         System.out.println("list");
-        return new ModelAndView("/users/list","userModel",model);
+        return new ModelAndView("users/list","userModel",model);
     }
 
     /**
