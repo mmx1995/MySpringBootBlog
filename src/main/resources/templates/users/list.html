@@ -3,9 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <title>Thymeleaf in action</title>
+    <link rel="stylesheet" type="text/css" href="/css/base.css" >
 </head>
 <body>
+    <!--此处引入header 中定义的片段-->
     <div th:replace="~{fragments/header :: header}"></div>
+    <!--此处加载返回值中所带的变量-->
+        <h3 th:text="${userModel.title}"></h3>
+        <!-- 插入新增用户链接-->
+        <a href="/users/form" th:href="@{/users/form}">创建用户</a>
+        <table>
+            <thead>
+            <tr>
+                <td>ID</td>
+                <td>Email</td>
+                <td>Name</td>
+            </tr>
+            </thead>
+            <tbody>
+                <!--判断，如果 userList 为空，则显示下面的text-->
+                <tr th:if="${userModel.userList.size()} eq 0">
+                    <td colspan="3"> 没有用户信息</td>
+                </tr>
+                <!-- each 循环 取数-->
+                <tr th:each="user : ${userModel.userList}">
+                    <td th:text="${user.id}"></td>
+                    <td th:text="${user.email}"></td>
+                    <td ><a th:href="@{'/users/'+${user.id}}" th:text="${user.name}"></a></td>
+                </tr>
+
+            </tbody>
+        </table>
     <div th:replace="~{fragments/footer :: footer}"></div>
 
 </body>

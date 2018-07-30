@@ -1,8 +1,8 @@
-.clr:after {
-    content: "";
-    display: table;
-    clear: both
+body{
+    background: cornsilk;
 }
-.clr {
-    *zoom:1;
+
+table{
+    border: darkolivegreen;
+    padding: 5px;
 }
