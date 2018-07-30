@@ -1,0 +1,8 @@
+.clr:after {
+    content: "";
+    display: table;
+    clear: both
+}
+.clr {
+    *zoom:1;
+}
