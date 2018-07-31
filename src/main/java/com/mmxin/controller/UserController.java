@@ -27,25 +27,14 @@ public class UserController {
 
     Log log = LogFactory.getLog(UserController.class);
 
-
-    /**
-     * 查询所有用户
-     * @param model
-     * */
     @GetMapping
-    public ModelAndView list(Model model){
+    public ModelAndView listUsers(Model model){
         model.addAttribute("userList",userRepository.listUsers());
         model.addAttribute("title","用户管理");
         log.info("now page : users");
         return new ModelAndView("users/list","userModel",model);
     }
 
-    /**
-     * 查询单个用户
-     * 需要注意的是id必须用大括号括起来
-     * @param model
-     * @param id
-     * */
     @GetMapping("{id}")
     public ModelAndView view(@PathVariable("id")Long id, Model model){
         User user  = userRepository.getUserById(id);
@@ -55,11 +44,6 @@ public class UserController {
         return new ModelAndView("users/view","userModel",model);
     }
 
-
-    /**
-     * 获取创建表单页面
-     * @param model
-     * */
     @GetMapping("/form")
     public ModelAndView createForm(Model model){
         model.addAttribute("user",new User());
@@ -67,10 +51,6 @@ public class UserController {
         return new ModelAndView("users/form","userModel",model);
     }
 
-    /**
-     * 表单提交完成，重定向到主页面
-     * @param user
-     * */
     @PostMapping
     public ModelAndView saveOrUpdateUser(User user, Model model){
         user  = userRepository.savaOrUpdateUser(user);
@@ -82,6 +62,16 @@ public class UserController {
         userRepository.deleteUser(id);
         model.addAttribute("title","用户列表");
         model.addAttribute("userList",userRepository.listUsers());
-        return new ModelAndView("redirect/users","userModel",model);
+        return new ModelAndView("redirect:/users","userModel",model);
+    }
+
+    /**
+     * 修改用户信息
+     * */
+    @GetMapping("modify/{id}")
+    public ModelAndView modifyUser(@PathVariable("id")Long id, Model model){
+        model.addAttribute("title","用户详情");
+        model.addAttribute("user",userRepository.getUserById(id));
+        return new ModelAndView("/users/form","userModel", model);
     }
 }
