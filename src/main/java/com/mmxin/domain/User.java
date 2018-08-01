@@ -1,14 +1,25 @@
 package com.mmxin.domain;
+
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import java.io.Serializable;
+
 /**
  * 用户实体
  * @author mmx
  * @date 2018-06-04
  * */
-public class User {
+@Entity
+public class User implements Serializable {
 
+    private static final long serialVersionUID = 5369565050437493701L;
     /**
      * 用户实体类唯一标识
      * */
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id ;
 
     /**

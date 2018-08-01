@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.util.Optional;
+
 /**
  * User 控制器
  * @author mmx
@@ -29,7 +31,7 @@ public class UserController {
 
     @GetMapping
     public ModelAndView listUsers(Model model){
-        model.addAttribute("userList",userRepository.listUsers());
+        model.addAttribute("userList",userRepository.findAll());
         model.addAttribute("title","用户管理");
         log.info("now page : users");
         return new ModelAndView("users/list","userModel",model);
@@ -37,7 +39,8 @@ public class UserController {
 
     @GetMapping("{id}")
     public ModelAndView view(@PathVariable("id")Long id, Model model){
-        User user  = userRepository.getUserById(id);
+        Optional<User> optional  = userRepository.findById(id);
+        User user = optional.get();
         model.addAttribute("user",user);
         model.addAttribute("title","查看用户");
         log.info(user.toString());
@@ -53,15 +56,13 @@ public class UserController {
 
     @PostMapping
     public ModelAndView saveOrUpdateUser(User user, Model model){
-        user  = userRepository.savaOrUpdateUser(user);
+        user  = userRepository.save(user);
         return new ModelAndView("redirect:/users","userModel",model);
     }
 
     @GetMapping("/delete/{id}")
     public ModelAndView deleteUser(@PathVariable("id")Long id,Model model){
-        userRepository.deleteUser(id);
-        model.addAttribute("title","用户列表");
-        model.addAttribute("userList",userRepository.listUsers());
+        userRepository.deleteById(id);
         return new ModelAndView("redirect:/users","userModel",model);
     }
 
@@ -71,7 +72,7 @@ public class UserController {
     @GetMapping("modify/{id}")
     public ModelAndView modifyUser(@PathVariable("id")Long id, Model model){
         model.addAttribute("title","用户详情");
-        model.addAttribute("user",userRepository.getUserById(id));
+        model.addAttribute("user",userRepository.findById(id).get());
         return new ModelAndView("/users/form","userModel", model);
     }
 }
