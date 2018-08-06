@@ -17,6 +17,11 @@ import java.util.List;
 
 /**
  * @author 18636
+ * todo:
+ *      1、esi检索的时候，加了双引号之后，所有的部分全部会被检索出来这是为啥
+ *      eg： "思" ，"元"  的结果为全部出来
+ *      但是
+ *      eg: 思 ， 元  的结果是正确的结果
  */
 @RestController
 @RequestMapping("blog")
