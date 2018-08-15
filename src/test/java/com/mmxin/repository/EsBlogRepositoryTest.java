@@ -23,7 +23,7 @@ public class EsBlogRepositoryTest {
     @Autowired
     private EsBlogRepository esBlogRepository ;
 
-    //@Before
+    @Before
     public void initRepositoryDate(){
         //清除所有数据
         esBlogRepository.deleteAll();
