@@ -2,6 +2,9 @@ package com.mmxin.controller;
 
 import com.mmxin.domain.User;
 import com.mmxin.repository.UserRepository;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.juli.logging.Log;
 import org.apache.juli.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +15,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
+import sun.net.www.http.HttpClient;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.Optional;
 
 /**

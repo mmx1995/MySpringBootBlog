@@ -7,11 +7,11 @@
         <h3 th:text="${userModel.title}"></h3>
         <form th:action="@{/users}" method="post" th:object="${userModel.user}">
             <input type="hidden" name="id" th:value="*{id}">
-            名称：</br>
-            <input class="form-control" type="text" name="name" th:value="*{name}"></br>
-            邮箱：</br>
-            <input class="form-control" type="text" name="email" th:value="*{email}"> </br>
-            <input type="submit" value="提交">
+            名称：
+            <input class="form-control" type="text" name="name" th:value="*{name}">
+            邮箱：
+            <input class="form-control" type="text" name="email" th:value="*{email}">
+            <input class="btn btn-default" type="submit" value="提交">
         </form>
     </div>
     <div th:replace="~{fragments/footer :: footer}"></div>
