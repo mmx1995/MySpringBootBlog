@@ -96,7 +96,12 @@
         <dependency>
             <groupId>org.thymeleaf.extras</groupId>
             <artifactId>thymeleaf-extras-springsecurity4</artifactId>
-            <version>3.0.2.RELEASE</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-devtools</artifactId>
+            <optional>true</optional>
         </dependency>
 
     </dependencies>
@@ -111,10 +116,6 @@
                 </configuration>
             </plugin>
             <!--热部署相关配置-->
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
         </plugins>
     </build>
 

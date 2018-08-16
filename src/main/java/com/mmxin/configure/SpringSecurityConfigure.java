@@ -2,6 +2,7 @@ package com.mmxin.configure;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -15,6 +16,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
  * 重写configure 方法
  */
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(prePostEnabled = true) // 启用方法安全设置
 public class SpringSecurityConfigure extends WebSecurityConfigurerAdapter {
     /**
      * 自定义配置
