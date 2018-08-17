@@ -36,6 +36,9 @@ public class UserController {
 
     Log log = LogFactory.getLog(UserController.class);
 
+    /**
+     * 获取用户列表页面
+     * */
     @GetMapping
     public ModelAndView listUsers(Model model){
         model.addAttribute("userList",userRepository.findAll());
@@ -44,6 +47,9 @@ public class UserController {
         return new ModelAndView("users/list","userModel",model);
     }
 
+    /**
+     * 查询用户详情页面
+     * */
     @GetMapping("{id}")
     public ModelAndView view(@PathVariable("id")Long id, Model model){
         Optional<User> optional  = userRepository.findById(id);
@@ -54,6 +60,9 @@ public class UserController {
         return new ModelAndView("users/view","userModel",model);
     }
 
+    /**
+     * 创建用户页面
+     * */
     @GetMapping("/form")
     public ModelAndView createForm(Model model){
         model.addAttribute("user",new User());
@@ -61,12 +70,19 @@ public class UserController {
         return new ModelAndView("users/form","userModel",model);
     }
 
+
+    /**
+     * 编辑用户信息页面
+     * */
     @PostMapping
     public ModelAndView saveOrUpdateUser(User user, Model model){
         user  = userRepository.save(user);
         return new ModelAndView("redirect:/users","userModel",model);
     }
 
+    /**
+     * 删除用户页面
+     * */
     @GetMapping("/delete/{id}")
     public ModelAndView deleteUser(@PathVariable("id")Long id,Model model){
         userRepository.deleteById(id);

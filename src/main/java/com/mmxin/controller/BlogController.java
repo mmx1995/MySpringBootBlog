@@ -24,8 +24,8 @@ import java.util.List;
  *      eg: 思 ， 元  的结果是正确的结果
  */
 @RestController
-@RequestMapping("blog")
-public class BlogController {
+@RequestMapping("blogs")
+public class  BlogController {
 
     @Autowired
     EsBlogRepository esBlogRepository ;
@@ -48,5 +48,16 @@ public class BlogController {
             list.add(esBlog);
         }
         return list;
+    }
+    /**
+     * 博客首页，用来加载博客
+     * @param order  排序规则
+     * @param keyword  标签,关键字
+     * */
+    @GetMapping("/index")
+    public String listBlogs(@RequestParam(value="order",required = false,defaultValue = "new") String order,
+                            @RequestParam(value = "keyword",required = false,defaultValue = "")String keyword){
+        System.out.println("order： " + order +", keyword: " + keyword);
+        return "redirect:/index?order="+order+"&keyword="+keyword;
     }
 }
