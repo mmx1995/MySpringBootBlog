@@ -3,6 +3,7 @@ package com.mmxin.service;
 import com.mmxin.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -61,4 +62,9 @@ public interface UserService {
      * @return
      */
     Page<User> listUsersByNameLike(String name, Pageable pageable);
+
+    /**
+     * 查询用户权限列表
+     * */
+    UserDetails loadByUserName(String userName);
 }

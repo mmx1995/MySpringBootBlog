@@ -24,13 +24,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 /**
  * 用户实体
  * @author mmx
  * @date 2018-06-04
  * */
 @Entity
-public class User implements Serializable {
+public class User implements Serializable,UserDetails {
 
     private static final long serialVersionUID = 5369565050437493701L;
     /**
@@ -51,6 +52,7 @@ public class User implements Serializable {
 
     /**
      * 用户邮箱
+     * 最大长度不超过50
      * */
     @NotEmpty(message = "邮箱不能为空")
     @Size(max=50)
@@ -60,14 +62,16 @@ public class User implements Serializable {
 
     /**
      * 用户名
+     * 最短3位，最长20
      * */
     @NotEmpty(message = "账号不能为空")
     @Size(min=3, max=20)
     @Column(nullable = false, length = 20, unique = true)
-    private String userName ;
+    private String username ;
 
     /*
     * 密码
+    * 最大长度100
     * */
     @NotEmpty(message = "密码不能为空")
     @Size(max=100)
@@ -76,10 +80,14 @@ public class User implements Serializable {
 
     /*
     * 用户头像信息
+    * 记录头像链接
     * */
     @Column(length = 200)
     private String avatar ;
 
+    /**
+     * 权限管理列表
+     * */
     @ManyToMany(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
     @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "authority_id", referencedColumnName = "id"))
@@ -88,7 +96,14 @@ public class User implements Serializable {
     /**
      * 空构造函数
      * */
-    public User() {
+    public  User() { // JPA 的规范要求无参构造函数；设为 protected 防止直接使用
+    }
+
+    public User(String name, String email,String username,String password) {
+        this.name = name;
+        this.email = email;
+        this.username = username;
+        this.password = password;
     }
 
     public Long getId() {
@@ -115,30 +130,6 @@ public class User implements Serializable {
         this.email = email;
     }
 
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
-    }
-
     public Collection<? extends GrantedAuthority> getAuthorities() {
         //  需将 List<Authority> 转成 List<SimpleGrantedAuthority>，否则前端拿不到角色列表名称
         List<SimpleGrantedAuthority> simpleAuthorities = new ArrayList<>();
@@ -151,13 +142,65 @@ public class User implements Serializable {
     public void setAuthorities(List<Authority> authorities) {
         this.authorities = authorities;
     }
+
+    @Override
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    @Override
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setEncodePassword(String password) {
+        PasswordEncoder  encoder = new BCryptPasswordEncoder();
+        String encodePasswd = encoder.encode(password);
+        this.password = encodePasswd;
+    }
+
+    public String getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(String avatar) {
+        this.avatar = avatar;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
     @Override
     public String toString() {
         return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
-                ", userName='" + userName + '\'' +
+                ", userName='" + username + '\'' +
                 ", password='" + password + '\'' +
                 ", avatar='" + avatar + '\'' +
                 '}';
