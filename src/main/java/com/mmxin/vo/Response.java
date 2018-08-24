@@ -1,7 +1,8 @@
 package com.mmxin.vo;
 
 /**
- * 响应，值对象
+ * Restful 风格接口
+ * 封装统一的返回值响应，值对象
  * @author : mmxin
  * @className : Response
  * @date : 2018/8/17 18:21

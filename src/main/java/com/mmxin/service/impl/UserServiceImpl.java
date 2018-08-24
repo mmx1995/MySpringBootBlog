@@ -13,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 
@@ -22,13 +24,18 @@ import org.springframework.stereotype.Service;
  * @date : 2018/8/17 18:11
  */
 @Service
-public class UserServiceImpl implements UserService {
+public class UserServiceImpl implements UserService, UserDetailsService {
+
     @Autowired
     private UserRepository userRepository;
 
     @Transactional
     @Override
     public User saveUser(User user) {
+        String password = user.getPassword();
+        PasswordEncoder encoder = new BCryptPasswordEncoder();
+        password = encoder.encode(password);
+        user.setPassword(password);
         return userRepository.save(user);
     }
 
@@ -69,9 +76,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDetails loadByUserName(String userName) {
-        return userRepository.loadUserByUserName();
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByUsername(username);
     }
-
 
 }

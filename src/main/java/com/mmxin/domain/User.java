@@ -29,6 +29,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
  * 用户实体
  * @author mmx
  * @date 2018-06-04
+ * 整个实体类，除了最基本的属性之外，Spring Security 的集成通过Authority 类的集成来实现
  * */
 @Entity
 public class User implements Serializable,UserDetails {
@@ -87,6 +88,7 @@ public class User implements Serializable,UserDetails {
 
     /**
      * 权限管理列表
+     * 多对多
      * */
     @ManyToMany(cascade = CascadeType.DETACH, fetch = FetchType.EAGER)
     @JoinTable(name = "user_authority", joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),

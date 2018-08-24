@@ -3,7 +3,6 @@ package com.mmxin.service;
 import com.mmxin.domain.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.List;
 
@@ -23,14 +22,14 @@ public interface UserService {
 
     /**
      * 删除用户
-     * @param user
+     * @param id
      * @return
      */
     void removeUser(Long id);
 
     /**
      * 删除列表里面的用户
-     * @param user
+     * @param users
      * @return
      */
     void removeUsersInBatch(List<User> users);
@@ -44,27 +43,21 @@ public interface UserService {
 
     /**
      * 根据id获取用户
-     * @param user
+     * @param id
      * @return
      */
     User getUserById(Long id);
 
     /**
      * 获取用户列表
-     * @param user
      * @return
      */
     List<User> listUsers();
 
     /**
      * 根据用户名进行分页模糊查询
-     * @param user
+     * @param name
      * @return
      */
     Page<User> listUsersByNameLike(String name, Pageable pageable);
-
-    /**
-     * 查询用户权限列表
-     * */
-    UserDetails loadByUserName(String userName);
 }

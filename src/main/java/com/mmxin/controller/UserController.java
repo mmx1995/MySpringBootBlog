@@ -1,101 +1,140 @@
 package com.mmxin.controller;
 
-import com.mmxin.domain.User;
-import com.mmxin.repository.UserRepository;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClients;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.apache.juli.logging.Log;
-import org.apache.juli.logging.LogFactory;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.validation.ConstraintViolationException;
+
+import com.mmxin.util.ConstrainViolationExceptionHandler;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
-import sun.net.www.http.HttpClient;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Optional;
+import com.mmxin.domain.Authority;
+import com.mmxin.domain.User;
+import com.mmxin.service.AuthorityService;
+import com.mmxin.service.UserService;
+import com.mmxin.vo.Response;
 
 /**
  * User 控制器
  * @author mmx
  * @date 2018/07/30
  * */
-@Controller
+@RestController
 @RequestMapping("/users")
+@PreAuthorize("hasAuthority('ROLE_ADMIN')")  // 指定角色权限才能操作方法
 public class UserController {
 
     @Autowired
-    private UserRepository userRepository ;
+    private UserService userService;
 
-    Log log = LogFactory.getLog(UserController.class);
+    @Autowired
+    private AuthorityService  authorityService;
 
     /**
-     * 获取用户列表页面
-     * */
+     * 查询所用用户
+     * @return
+     */
     @GetMapping
-    public ModelAndView listUsers(Model model){
-        model.addAttribute("userList",userRepository.findAll());
-        model.addAttribute("title","用户管理");
-        log.info("now page : users");
-        return new ModelAndView("users/list","userModel",model);
+    public ModelAndView list(@RequestParam(value="async",required=false) boolean async,
+                             @RequestParam(value="pageIndex",required=false,defaultValue="0") int pageIndex,
+                             @RequestParam(value="pageSize",required=false,defaultValue="10") int pageSize,
+                             @RequestParam(value="name",required=false,defaultValue="") String name,
+                             Model model) {
+
+        Pageable pageable = new PageRequest(pageIndex, pageSize);
+        Page<User> page = userService.listUsersByNameLike(name, pageable);
+        List<User> list = page.getContent();	// 当前所在页面数据列表
+
+        model.addAttribute("page", page);
+        model.addAttribute("userList", list);
+        return new ModelAndView(async==true?"users/list :: #mainContainerRepleace":"users/list", "userModel", model);
     }
 
     /**
-     * 查询用户详情页面
-     * */
-    @GetMapping("{id}")
-    public ModelAndView view(@PathVariable("id")Long id, Model model){
-        Optional<User> optional  = userRepository.findById(id);
-        User user = optional.get();
-        model.addAttribute("user",user);
-        model.addAttribute("title","查看用户");
-        log.info(user.toString());
-        return new ModelAndView("users/view","userModel",model);
+     * 获取 form 表单页面
+     * @return
+     */
+    @GetMapping("/add")
+    public ModelAndView createForm(Model model) {
+        model.addAttribute("user", new User(null, null, null, null));
+        return new ModelAndView("users/add", "userModel", model);
     }
 
     /**
-     * 创建用户页面
-     * */
-    @GetMapping("/form")
-    public ModelAndView createForm(Model model){
-        model.addAttribute("user",new User());
-        model.addAttribute("title","创建用户");
-        return new ModelAndView("users/form","userModel",model);
-    }
-
-
-    /**
-     * 编辑用户信息页面
-     * */
+     * 新建用户
+     * @param user
+     * @return
+     */
     @PostMapping
-    public ModelAndView saveOrUpdateUser(User user, Model model){
-        user  = userRepository.save(user);
-        return new ModelAndView("redirect:/users","userModel",model);
+    public ResponseEntity<Response> create(User user, Long authorityId) {
+        List<Authority> authorities = new ArrayList<>();
+        authorities.add(authorityService.getAuthorityById(authorityId));
+        user.setAuthorities(authorities);
+
+        if(user.getId() == null) {
+            user.setEncodePassword(user.getPassword()); // 加密密码
+        }else {
+            // 判断密码是否做了变更
+            User originalUser = userService.getUserById(user.getId());
+            String rawPassword = originalUser.getPassword();
+            PasswordEncoder  encoder = new BCryptPasswordEncoder();
+            String encodePasswd = encoder.encode(user.getPassword());
+            boolean isMatch = encoder.matches(rawPassword, encodePasswd);
+            if (!isMatch) {
+                user.setEncodePassword(user.getPassword());
+            }else {
+                user.setPassword(user.getPassword());
+            }
+        }
+
+        try {
+            userService.saveUser(user);
+        }  catch (ConstraintViolationException e)  {
+            return ResponseEntity.ok().body(new Response(false, ConstrainViolationExceptionHandler.getMessage(e)));
+        }
+
+        return ResponseEntity.ok().body(new Response(true, "处理成功", user));
     }
 
     /**
-     * 删除用户页面
-     * */
-    @GetMapping("/delete/{id}")
-    public ModelAndView deleteUser(@PathVariable("id")Long id,Model model){
-        userRepository.deleteById(id);
-        return new ModelAndView("redirect:/users","userModel",model);
+     * 删除用户
+     * @param id
+     * @return
+     */
+    @DeleteMapping(value = "/{id}")
+    public ResponseEntity<Response> delete(@PathVariable("id") Long id, Model model) {
+        try {
+            userService.removeUser(id);
+        } catch (Exception e) {
+            return  ResponseEntity.ok().body( new Response(false, e.getMessage()));
+        }
+        return  ResponseEntity.ok().body( new Response(true, "处理成功"));
     }
 
     /**
-     * 修改用户信息
-     * */
-    @GetMapping("modify/{id}")
-    public ModelAndView modifyUser(@PathVariable("id")Long id, Model model){
-        model.addAttribute("title","用户详情");
-        model.addAttribute("user",userRepository.findById(id).get());
-        return new ModelAndView("/users/form","userModel", model);
+     * 获取修改用户的界面，及数据
+     * @return
+     */
+    @GetMapping(value = "edit/{id}")
+    public ModelAndView modifyForm(@PathVariable("id") Long id, Model model) {
+        User user = userService.getUserById(id);
+        model.addAttribute("user", user);
+        return new ModelAndView("users/edit", "userModel", model);
     }
 }
