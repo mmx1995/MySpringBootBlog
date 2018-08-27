@@ -74,7 +74,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         Page<User> users = userRepository.findByNameLike(name, pageable);
         return users;
     }
-
+    /**
+     * 实现UserDetailsService 接口的方法
+     * */
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByUsername(username);

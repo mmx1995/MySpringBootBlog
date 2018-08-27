@@ -104,6 +104,13 @@
             <version>2.1</version>
         </dependency>
 
+        <!--markdown parser 依赖，主要是一个页面编辑器的实现-->
+        <dependency>
+            <groupId>es.nitaur.markdown</groupId>
+            <artifactId>txtmark</artifactId>
+            <version>0.16</version>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>

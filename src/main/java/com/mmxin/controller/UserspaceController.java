@@ -4,6 +4,7 @@ import com.mmxin.domain.User;
 import com.mmxin.service.UserService;
 import com.mmxin.vo.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,11 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 
@@ -34,24 +31,33 @@ public class UserspaceController {
     @Autowired
     private UserService userService;
 
+    @Value("$file.server.url")
+    private String fileServerUrl ;
+
+    // todo: 暂时不知道是干啥的，先留着，如果之后没用就删掉
     @GetMapping("/{username}")
     public String userSpace(@PathVariable("username") String username) {
         System.out.println("username" + username);
         return "u";
     }
 
+    /**
+     * 获取个人信息管理页面
+     * */
     @GetMapping("/{username}/profile")
     @PreAuthorize("authentication.name.equals(#username)")
     public ModelAndView profile(@PathVariable("username") String username, Model model) {
         User user = (User)userDetailsService.loadUserByUsername(username);
         model.addAttribute("user", user);
+        model.addAttribute("fileServerUrl",fileServerUrl);      //将文件服务器的地址返回给页面
         return new ModelAndView("/userspace/profile", "userModel", model);
     }
 
     /**
      * 保存个人设置
+     * PreAuthorize 主要做的是一个权限控制管理，判断查看的是不是当前用户的信息
      * @param user
-     * @return
+     * @param username
      */
     @PostMapping("/{username}/profile")
     @PreAuthorize("authentication.name.equals(#username)")
@@ -76,15 +82,18 @@ public class UserspaceController {
     /**
      * 获取编辑头像的界面
      * @param username
-     * @param model
-     * @return
+     * @param user
      */
     @GetMapping("/{username}/avatar")
     @PreAuthorize("authentication.name.equals(#username)")
-    public ModelAndView avatar(@PathVariable("username") String username, Model model) {
-        User  user = (User)userDetailsService.loadUserByUsername(username);
-        model.addAttribute("user", user);
-        return new ModelAndView("/userspace/avatar", "userModel", model);
+    public ResponseEntity<Response> avatar(@PathVariable("username") String username, @RequestBody User user){
+        //用户提交图片之后返回一个资源服务器的链接，将链接存储到数据库
+        String avatarUrl = user.getAvatar();
+        //获取用户id，查找对应的用户，修改头像信息
+        User originalUser = userService.getUserById(user.getId());
+        originalUser.setAvatar(avatarUrl);
+        userService.saveUser(originalUser);
+        return ResponseEntity.ok().body(new Response(true,"处理成功", avatarUrl));
     }
 
 
